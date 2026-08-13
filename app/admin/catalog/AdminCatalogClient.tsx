@@ -21,6 +21,7 @@ function ChangeCard({ change, onReviewed }: { change: Change; onReviewed: () => 
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const payload = JSON.parse(change.payload_json) as CatalogSubmission;
+  const reviewImage = payload.crawlAttempts?.find((attempt) => attempt.status === "matched" && attempt.previewImageUrl);
 
   async function review(action: "approve" | "reject") {
     const note = action === "reject" ? window.prompt("请输入驳回原因") : window.prompt("审核备注（可选）", "规格与来源已核对");
@@ -49,6 +50,7 @@ function ChangeCard({ change, onReviewed }: { change: Change; onReviewed: () => 
         <div><span>{payload.board.brand} · {payload.board.year}</span><h2>{payload.board.model}</h2></div>
         <b>{payload.board.variants.length} 个尺码</b>
       </div>
+      {reviewImage ? <figure className="review-product-image"><img /* eslint-disable-line @next/next/no-img-element */ src={reviewImage.previewImageUrl} alt={`${payload.board.brand} ${payload.board.model} 官网示例图`} /><figcaption>品牌官网示例图 · 仅供审核核对，不作为推荐页官方店铺主图</figcaption></figure> : <div className="review-image-missing">官网未提供可用示例图</div>}
       <dl className="review-specs">
         <div><dt>板型</dt><dd>{payload.board.profile} · {payload.board.shape}</dd></div>
         <div><dt>硬度</dt><dd>{payload.board.flex} / 10</dd></div>
@@ -61,7 +63,7 @@ function ChangeCard({ change, onReviewed }: { change: Change; onReviewed: () => 
         <div className="crawl-results-title"><b>爬虫结果</b><span>{payload.crawlAttempts?.length ?? 0} 个来源</span></div>
         {payload.crawlAttempts?.length ? payload.crawlAttempts.map((attempt) => (
           <article key={`${attempt.sourceType}-${attempt.sourceUrl}`}>
-            {attempt.imageUrl ? <img /* eslint-disable-line @next/next/no-img-element */ src={attempt.imageUrl} alt={`${payload.board.brand} ${payload.board.model} 采集主图`} /> : <div className="crawl-image-empty">无主图</div>}
+            {attempt.previewImageUrl || attempt.imageUrl ? <img /* eslint-disable-line @next/next/no-img-element */ src={attempt.previewImageUrl ?? attempt.imageUrl} alt={`${payload.board.brand} ${payload.board.model} 采集示例图`} /> : <div className="crawl-image-empty">无示例图</div>}
             <div><strong>{attempt.platform} · {attempt.sourceName}</strong><span className={`crawl-status status-${attempt.status}`}>{crawlStatusLabels[attempt.status]}</span><small>{attempt.rawPrice ? `原始价格 ${money(attempt.rawPrice.amount, attempt.rawPrice.currency)}` : attempt.message ?? "未获取价格"}</small><a href={attempt.sourceUrl} target="_blank" rel="noreferrer">打开采集来源 ↗</a></div>
           </article>
         )) : <p>这条旧数据没有保存采集尝试记录。</p>}

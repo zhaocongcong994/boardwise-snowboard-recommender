@@ -229,6 +229,10 @@ legend { margin-bottom: 13px; font-size: 13px; font-weight: 700; }
 .review-card-head span { color: var(--muted); font: 11px var(--font-geist-mono); letter-spacing: .1em; }
 .review-card-head h2 { margin: 6px 0 0; font-size: 30px; }
 .review-card-head > b { color: #4e9fbe; }
+.review-product-image { margin: 24px 0; padding: 18px; display: grid; grid-template-columns: minmax(180px,300px) 1fr; gap: 22px; align-items: end; background: #f4f6f5; border: 1px solid var(--line); }
+.review-product-image img { width: 100%; height: 300px; object-fit: contain; background: #fff; }
+.review-product-image figcaption { color: var(--muted); font-size: 11px; line-height: 1.6; }
+.review-image-missing { margin: 24px 0; padding: 28px; color: var(--muted); text-align: center; border: 1px dashed var(--line); font-size: 12px; }
 .review-specs { display: grid; grid-template-columns: repeat(4,1fr); margin: 24px 0; border: 1px solid var(--line); }
 .review-specs > div { padding: 15px; border-right: 1px solid var(--line); }
 .review-specs > div:last-child { border-right: 0; }

@@ -99,3 +99,19 @@ test("only accepts product images from a verified official flagship source", () 
   });
   assert.ok(errors.some((error) => error.includes("只能来自品牌官方店铺")));
 });
+
+test("accepts an official website image for admin review without promoting it to product image", () => {
+  const submission = {
+    ...validSubmission,
+    crawlAttempts: [{
+      sourceType: "brand_official",
+      platform: "品牌官网",
+      sourceName: "Example 官网",
+      sourceUrl: "https://example.com/item",
+      status: "matched",
+      checkedAt: "2026-08-13T00:00:00.000Z",
+      previewImageUrl: "https://example.com/item.jpg",
+    }],
+  };
+  assert.deepEqual(validateCatalogSubmission(submission), []);
+});

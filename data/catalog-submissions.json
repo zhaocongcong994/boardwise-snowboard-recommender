@@ -38,7 +38,7 @@
     },
     "crawlAttempts": [
       { "sourceType": "official_flagship", "platform": "天猫", "sourceName": "品牌官方店铺检索", "sourceUrl": "https://www.tmall.com/", "status": "not_found", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "公开检索未找到可核验为 Burton 官方店铺且型号完全一致的商品页，因此未采集价格和主图。" },
-      { "sourceType": "brand_official", "platform": "Burton 官网", "sourceName": "Burton 官方网站 · Winter 2026", "sourceUrl": "https://www.burton.com/en-us/products/burton-cultivator-flat-top-snowboard-3028910-o", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 429.95, "currency": "USD" }, "message": "官网价格作为官方店铺未命中后的兜底展示价；官网图片不替代官方店铺主图。" }
+      { "sourceType": "brand_official", "platform": "Burton 官网", "sourceName": "Burton 官方网站 · Winter 2026", "sourceUrl": "https://www.burton.com/en-us/products/burton-cultivator-flat-top-snowboard-3028910-o", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 429.95, "currency": "USD" }, "previewImageUrl": "https://www.burton.com/cdn/shop/files/3028910N94_1.webp?v=1776132910&width=1200", "message": "官网价格作为官方店铺未命中后的兜底展示价；官网示例图仅在审核页展示。" }
     ],
     "price": { "amount": 429.95, "currency": "USD", "sourceType": "brand_official", "sourceName": "Burton 官方网站", "sourceUrl": "https://www.burton.com/en-us/products/burton-cultivator-flat-top-snowboard-3028910-o", "observedAt": "2026-08-13T13:30:00+08:00", "priceLabel": "官网展示价" }
   },
@@ -80,7 +80,7 @@
     },
     "crawlAttempts": [
       { "sourceType": "official_flagship", "platform": "天猫", "sourceName": "品牌官方店铺检索", "sourceUrl": "https://www.tmall.com/", "status": "not_found", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "公开检索未找到可核验为 Nitro 官方店铺且型号完全一致的商品页，因此未采集价格和主图。" },
-      { "sourceType": "brand_official", "platform": "Nitro 官网", "sourceName": "Nitro 官方网站 · Prime Raw 2026", "sourceUrl": "https://www.nitrosnowboards.com/products/prime-raw-snowboard", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "官网页面提供规格但没有可采集的展示价格。" }
+      { "sourceType": "brand_official", "platform": "Nitro 官网", "sourceName": "Nitro 官方网站 · Prime Raw 2026", "sourceUrl": "https://www.nitrosnowboards.com/products/prime-raw-snowboard", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "previewImageUrl": "https://www.nitrosnowboards.com/cdn/shop/files/833225-001_Prime-Raw_149_Product-1.jpg?v=1755928801&width=993", "message": "官网页面提供规格和审核示例图，但没有可采集的展示价格。" }
     ],
     "price": null
   },
@@ -125,7 +125,7 @@
     },
     "crawlAttempts": [
       { "sourceType": "official_flagship", "platform": "天猫", "sourceName": "品牌官方店铺检索", "sourceUrl": "https://www.tmall.com/", "status": "not_found", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "公开检索未找到可核验为 Nidecker 官方店铺且型号完全一致的商品页，因此未采集价格和主图。" },
-      { "sourceType": "brand_official", "platform": "Nidecker 官网", "sourceName": "Nidecker 官方网站 · Merc 2026", "sourceUrl": "https://eu.nidecker.com/de/products/merc-2026", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 429.95, "currency": "CHF" }, "message": "官网价格作为官方店铺未命中后的兜底展示价；官网图片不替代官方店铺主图。" }
+      { "sourceType": "brand_official", "platform": "Nidecker 官网", "sourceName": "Nidecker 官方网站 · Merc 2026", "sourceUrl": "https://eu.nidecker.com/de/products/merc-2026", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 429.95, "currency": "CHF" }, "previewImageUrl": "https://eu.nidecker.com/cdn/shop/files/N.26.SNM.MER-Merc-1_tkp04w.webp?v=1764651173&width=1200", "message": "官网价格作为官方店铺未命中后的兜底展示价；官网示例图仅在审核页展示。" }
     ],
     "price": { "amount": 429.95, "currency": "CHF", "sourceType": "brand_official", "sourceName": "Nidecker 官方网站", "sourceUrl": "https://eu.nidecker.com/de/products/merc-2026", "observedAt": "2026-08-13T13:30:00+08:00", "priceLabel": "官网展示价" }
   },
@@ -169,7 +169,7 @@
     },
     "crawlAttempts": [
       { "sourceType": "official_flagship", "platform": "天猫", "sourceName": "品牌官方店铺检索", "sourceUrl": "https://www.tmall.com/", "status": "not_found", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "公开检索未找到可核验为 Rome 官方店铺且型号完全一致的商品页，因此未采集价格和主图。" },
-      { "sourceType": "brand_official", "platform": "Rome 官网", "sourceName": "Rome 官方网站 · Warden 2025/2026", "sourceUrl": "https://romesnowboards.com/products/rome-warden-2526-mens-snowboard", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 328.95, "currency": "USD" }, "message": "官网价格作为官方店铺未命中后的兜底展示价；官网图片不替代官方店铺主图。" }
+      { "sourceType": "brand_official", "platform": "Rome 官网", "sourceName": "Rome 官方网站 · Warden 2025/2026", "sourceUrl": "https://romesnowboards.com/products/rome-warden-2526-mens-snowboard", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 328.95, "currency": "USD" }, "previewImageUrl": "https://romesnowboards.com/cdn/shop/files/2526_Rome-Web_BD_Warden.jpg?v=1757347144&width=1445", "message": "官网价格作为官方店铺未命中后的兜底展示价；官网示例图仅在审核页展示。" }
     ],
     "price": { "amount": 328.95, "currency": "USD", "sourceType": "brand_official", "sourceName": "Rome 官方网站", "sourceUrl": "https://romesnowboards.com/products/rome-warden-2526-mens-snowboard", "observedAt": "2026-08-13T13:30:00+08:00", "priceLabel": "官网展示价" }
   }

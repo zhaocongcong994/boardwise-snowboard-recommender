@@ -10,6 +10,7 @@ export type CrawlAttempt = {
   status: "matched" | "not_found" | "blocked" | "error";
   checkedAt: string;
   rawPrice?: { amount: number; currency: SupportedCurrency };
+  previewImageUrl?: string;
   imageUrl?: string;
   message?: string;
 };
@@ -80,6 +81,7 @@ export function validateCatalogSubmission(input: CatalogSubmission): string[] {
   }
   for (const attempt of input.crawlAttempts ?? []) {
     if (!attempt.sourceUrl.startsWith("https://")) errors.push("爬虫来源必须是 HTTPS URL");
+    if (attempt.previewImageUrl && !attempt.previewImageUrl.startsWith("https://")) errors.push("审核示例图必须是 HTTPS URL");
     if (attempt.imageUrl && attempt.sourceType !== "official_flagship") errors.push("非官方店铺爬虫结果不得提供推荐主图");
   }
   return [...new Set(errors)];
