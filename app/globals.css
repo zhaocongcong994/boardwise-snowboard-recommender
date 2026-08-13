@@ -225,6 +225,9 @@ legend { margin-bottom: 13px; font-size: 13px; font-weight: 700; }
 .review-specs dd { margin: 7px 0 0; font-weight: 700; font-size: 13px; }
 .variant-preview { display: flex; flex-wrap: wrap; gap: 8px; }
 .variant-preview span { padding: 8px 10px; background: #eef4f4; font-size: 11px; }
+.normalization-notes { margin-top: 18px; padding: 16px 18px; background: #fff8df; border: 1px solid #eadca9; font-size: 12px; line-height: 1.6; }
+.normalization-notes b { display: block; margin-bottom: 6px; }
+.normalization-notes ul { margin: 0; padding-left: 18px; }
 .source-links { display: flex; gap: 18px; margin-top: 20px; }
 .source-links a { color: #347f9d; font-size: 12px; border-bottom: 1px solid; }
 .review-card footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }

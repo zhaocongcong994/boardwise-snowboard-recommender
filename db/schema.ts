@@ -33,6 +33,7 @@ export const snowboardVariants = sqliteTable("snowboard_variants", {
   id: text("id").primaryKey(),
   boardId: text("board_id").notNull().references(() => snowboardModels.id, { onDelete: "cascade" }),
   size: integer("size").notNull(),
+  sizeLabel: text("size_label"),
   waist: integer("waist").notNull(),
   weightMin: real("weight_min").notNull(),
   weightMax: real("weight_max").notNull(),

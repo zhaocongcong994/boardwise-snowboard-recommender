@@ -52,7 +52,8 @@ function ChangeCard({ change, onReviewed }: { change: Change; onReviewed: () => 
         <div><dt>价格</dt><dd>{payload.price ? `¥${payload.price.amount.toLocaleString("zh-CN")} · ${payload.price.priceLabel}` : "暂无已核验价格"}</dd></div>
         <div><dt>采集时间</dt><dd>{new Date(change.collected_at).toLocaleString("zh-CN")}</dd></div>
       </dl>
-      <div className="variant-preview">{payload.board.variants.map((variant) => <span key={`${variant.size}-${variant.waist}`}>{variant.size} cm · {variant.waist} mm · {variant.weightMin}–{variant.weightMax} kg</span>)}</div>
+      <div className="variant-preview">{payload.board.variants.map((variant) => <span key={`${variant.size}-${variant.waist}`}>{variant.sizeLabel ?? variant.size} cm · {variant.waist} mm · {variant.weightMin}–{variant.weightMax} kg</span>)}</div>
+      {payload.specificationSource.normalizationNotes?.length ? <div className="normalization-notes"><b>标准化说明</b><ul>{payload.specificationSource.normalizationNotes.map((note) => <li key={note}>{note}</li>)}</ul></div> : null}
       <div className="source-links">
         <a href={payload.specificationSource.sourceUrl} target="_blank" rel="noreferrer">查看规格来源 ↗</a>
         {payload.price && payload.price.sourceUrl !== payload.specificationSource.sourceUrl && <a href={payload.price.sourceUrl} target="_blank" rel="noreferrer">查看价格来源 ↗</a>}

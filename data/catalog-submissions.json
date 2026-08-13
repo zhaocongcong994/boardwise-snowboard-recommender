@@ -1,1 +1,160 @@
-[]
+[
+  {
+    "board": {
+      "id": "burton-cultivator-flat-top-2526",
+      "brand": "BURTON",
+      "model": "Cultivator Flat Top",
+      "year": "25/26",
+      "level": ["beginner", "intermediate"],
+      "styles": { "all-mountain": 8, "carving": null, "freestyle": 6, "powder": 4 },
+      "flex": 3,
+      "profile": "Flat Top with Easy Bevel",
+      "shape": "Twin",
+      "color": "#d8ff55",
+      "variants": [
+        { "size": 135, "sizeLabel": "135", "waist": 237, "weightMin": 36, "weightMax": 54 },
+        { "size": 140, "sizeLabel": "140", "waist": 240, "weightMin": 36, "weightMax": 54 },
+        { "size": 145, "sizeLabel": "145", "waist": 243, "weightMin": 45, "weightMax": 68 },
+        { "size": 150, "sizeLabel": "150", "waist": 247, "weightMin": 54, "weightMax": 82 },
+        { "size": 155, "sizeLabel": "155", "waist": 252, "weightMin": 54, "weightMax": 82 }
+      ]
+    },
+    "specificationSource": {
+      "sourceName": "Burton 官方网站 · Winter 2026",
+      "sourceUrl": "https://www.burton.com/en-us/products/burton-cultivator-flat-top-snowboard-3028910-o",
+      "verifiedAt": "2026-08-13T12:00:00+08:00",
+      "fieldEvidence": {
+        "season": "页面标题与配色标识为 Winter 2026 / 26WIN，标准化为 25/26 雪季",
+        "level": "Riding Level: Beginner, Intermediate",
+        "profileShape": "Bend: Flat Top with Easy Bevel; Shape: Twin",
+        "terrain": "Park 60%; All Mountain 80%; Powder 40%",
+        "flex": "Personality: Soft & Playful",
+        "variants": "官网 Size Chart 的 Board Size、Weight Range 与 Waist Width"
+      },
+      "normalizationNotes": [
+        "官网百分比按 100% = 10 分线性换算；官网未给 carving 单项，因此保留 null。",
+        "Soft & Playful 按项目统一分档映射为 3/10；该数字是标准化值，不是 Burton 原始数字。"
+      ]
+    },
+    "price": null
+  },
+  {
+    "board": {
+      "id": "nitro-prime-raw-2526",
+      "brand": "NITRO",
+      "model": "Prime Raw",
+      "year": "25/26",
+      "level": ["first", "beginner"],
+      "styles": { "all-mountain": 10, "carving": null, "freestyle": 6, "powder": 7 },
+      "flex": 5,
+      "profile": "Cam-Out Camber",
+      "shape": "Directional",
+      "color": "#65d9ff",
+      "variants": [
+        { "size": 149, "sizeLabel": "149", "waist": 239, "weightMin": 50, "weightMax": 70 },
+        { "size": 152, "sizeLabel": "152MW", "waist": 250, "weightMin": 50, "weightMax": 70 },
+        { "size": 155, "sizeLabel": "155MW", "waist": 254, "weightMin": 55, "weightMax": 75 },
+        { "size": 158, "sizeLabel": "158MW", "waist": 256, "weightMin": 65, "weightMax": 85 }
+      ]
+    },
+    "specificationSource": {
+      "sourceName": "Nitro 官方网站 · Prime Raw 2026",
+      "sourceUrl": "https://www.nitrosnowboards.com/products/prime-raw-snowboard",
+      "verifiedAt": "2026-08-13T12:00:00+08:00",
+      "fieldEvidence": {
+        "season": "官网页面标题为 The 2026 Nitro Prime Raw Snowboard，标准化为 25/26 雪季",
+        "level": "产品描述明确写有从 first day、master the fundamentals 到 first 360 的进阶定位",
+        "profileShape": "Shape: Directional; Camber: Cam-Out Camber",
+        "terrain": "All Mountain 10/10; Park 6/10; Backcountry 7/10",
+        "flex": "Flex 5/10",
+        "variants": "官网 SPECS TABLE 的 Size、Waist Width 与 Rider Weight"
+      },
+      "normalizationNotes": [
+        "Park 映射到 freestyle，Backcountry 映射到 powder；官网未给 carving 单项，因此保留 null。",
+        "first 与 beginner 是依据官网产品描述形成的审核前分类，不是 Nitro 页面中的结构化等级字段。"
+      ]
+    },
+    "price": null
+  },
+  {
+    "board": {
+      "id": "nidecker-merc-2526",
+      "brand": "NIDECKER",
+      "model": "Merc",
+      "year": "25/26",
+      "level": ["beginner", "intermediate"],
+      "styles": { "all-mountain": 8, "carving": null, "freestyle": 6, "powder": 6 },
+      "flex": 4,
+      "profile": "CamRock",
+      "shape": "Directional Twin",
+      "color": "#d9c6ff",
+      "variants": [
+        { "size": 149, "sizeLabel": "149", "waist": 248, "weightMin": 50, "weightMax": 70 },
+        { "size": 152, "sizeLabel": "152", "waist": 254, "weightMin": 55, "weightMax": 80 },
+        { "size": 156, "sizeLabel": "156", "waist": 258, "weightMin": 65, "weightMax": 90 },
+        { "size": 156, "sizeLabel": "156W", "waist": 264, "weightMin": 65, "weightMax": 90 },
+        { "size": 159, "sizeLabel": "159", "waist": 260, "weightMin": 70, "weightMax": 95 },
+        { "size": 159, "sizeLabel": "159W", "waist": 268, "weightMin": 70, "weightMax": 95 }
+      ]
+    },
+    "specificationSource": {
+      "sourceName": "Nidecker 官方网站 · Merc 2026",
+      "sourceUrl": "https://eu.nidecker.com/de/products/merc-2026",
+      "verifiedAt": "2026-08-13T12:00:00+08:00",
+      "fieldEvidence": {
+        "season": "产品名 Merc 2026，标准化为 25/26 雪季",
+        "level": "描述强调易于发起转弯、不过分激进并覆盖 park 到 backcountry",
+        "profileShape": "Directional Twin; CamRock",
+        "terrain": "Resort 4/5; Pow 3/5; Park 3/5",
+        "flex": "Flex 2/5; Mid-Soft",
+        "variants": "官网 Snowboard Size details 的 size、Recommended rider's weight 与 Waist width"
+      },
+      "normalizationNotes": [
+        "5 分制乘以 2 转换为 10 分制；Resort 映射到 all-mountain，官网未给 carving 单项，因此保留 null。",
+        "162W 与 165W 只有开放式最低承重（80+、85+），当前数据合同不能表达无上限区间，所以本批不采入。",
+        "beginner 与 intermediate 是依据官网描述形成的审核前分类，不是 Nidecker 页面中的结构化等级字段。"
+      ]
+    },
+    "price": null
+  },
+  {
+    "board": {
+      "id": "rome-warden-2526",
+      "brand": "ROME",
+      "model": "Warden",
+      "year": "25/26",
+      "level": ["beginner", "intermediate"],
+      "styles": { "all-mountain": 7, "carving": null, "freestyle": 5, "powder": 6 },
+      "flex": 5,
+      "profile": "Fusion Camber",
+      "shape": "Directional Twin",
+      "color": "#ffdc5e",
+      "variants": [
+        { "size": 151, "sizeLabel": "151", "waist": 249, "weightMin": 52, "weightMax": 70 },
+        { "size": 154, "sizeLabel": "154", "waist": 250, "weightMin": 57.5, "weightMax": 75.5 },
+        { "size": 157, "sizeLabel": "157", "waist": 252, "weightMin": 62.5, "weightMax": 81 },
+        { "size": 158, "sizeLabel": "158W", "waist": 263, "weightMin": 68, "weightMax": 86.5 },
+        { "size": 160, "sizeLabel": "160", "waist": 254, "weightMin": 71, "weightMax": 89 },
+        { "size": 161, "sizeLabel": "161W", "waist": 264, "weightMin": 76.5, "weightMax": 94.5 }
+      ]
+    },
+    "specificationSource": {
+      "sourceName": "Rome 官方网站 · Warden 2025/2026",
+      "sourceUrl": "https://romesnowboards.com/products/rome-warden-2526-mens-snowboard",
+      "verifiedAt": "2026-08-13T12:00:00+08:00",
+      "fieldEvidence": {
+        "season": "官网页面标题与图片说明明确为 2025/2026",
+        "level": "描述强调建立信心、突破舒适区并适应全山路线",
+        "profileShape": "Fusion Camber; 页面图片说明为 Directional Twin Snowboard",
+        "terrain": "Park 5; All-Mountain 7; Powder 6",
+        "flex": "Flex 5",
+        "variants": "官网 Warden Snowboard Size Chart 的 Length、Waist Width 与 Recommended Weight"
+      },
+      "normalizationNotes": [
+        "官网 Terrain Map 已是 10 分制；Park 映射到 freestyle，官网未给 carving 单项，因此保留 null。",
+        "beginner 与 intermediate 是依据官网描述形成的审核前分类，不是 Rome 页面中的结构化等级字段。"
+      ]
+    },
+    "price": null
+  }
+]

@@ -1,0 +1,1 @@
+ALTER TABLE `snowboard_variants` ADD `size_label` text;

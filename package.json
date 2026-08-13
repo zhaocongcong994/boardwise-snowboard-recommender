@@ -12,7 +12,8 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "catalog:validate": "node scripts/validate-catalog.mjs"
+    "catalog:validate": "node scripts/validate-catalog.mjs",
+    "catalog:submit:local": "node scripts/submit-catalog.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

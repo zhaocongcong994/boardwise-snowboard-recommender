@@ -13,9 +13,13 @@ export type CatalogSubmission = {
     sourceUrl: string;
     verifiedAt: string;
     contentHash?: string;
+    fieldEvidence?: Record<string, string>;
+    normalizationNotes?: string[];
   };
   price: CatalogPrice | null;
 };
+
+const catalogStyles = ["all-mountain", "carving", "freestyle", "powder"] as const;
 
 const pricePriority: Record<PriceSourceType, number> = {
   brand_official: 1,
@@ -39,6 +43,14 @@ export function validateCatalogSubmission(input: CatalogSubmission): string[] {
   if (!specificationSource.sourceUrl.startsWith("https://")) errors.push("规格来源必须是 HTTPS URL");
   if (!board.variants.length) errors.push("至少需要一个已核验尺码");
   if (board.flex < 1 || board.flex > 10) errors.push("硬度必须在 1–10 之间");
+  for (const style of catalogStyles) {
+    const score = board.styles[style];
+    if (score === undefined) {
+      errors.push(`${style} 评分字段不能为空，未知值请使用 null`);
+      continue;
+    }
+    if (score !== null && (!Number.isFinite(score) || score < 0 || score > 10)) errors.push(`${style} 评分必须为空或在 0–10 之间`);
+  }
   for (const variant of board.variants) {
     if (variant.size < 120 || variant.size > 180) errors.push(`尺码 ${variant.size} 超出成人场地板范围`);
     if (variant.waist < 210 || variant.waist > 310) errors.push(`板腰 ${variant.waist} mm 超出合理范围`);
@@ -96,7 +108,7 @@ export async function loadPublishedCatalog(db: D1Database, now = new Date()): Pr
       updatedAt: priceInfo?.observedAt ?? String(row.updated_at),
       color: String(row.color),
       variants: variants.results.filter((variant) => variant.board_id === row.id).map((variant) => ({
-        size: Number(variant.size), waist: Number(variant.waist), weightMin: Number(variant.weight_min), weightMax: Number(variant.weight_max),
+        size: Number(variant.size), sizeLabel: variant.size_label ? String(variant.size_label) : undefined, waist: Number(variant.waist), weightMin: Number(variant.weight_min), weightMax: Number(variant.weight_max),
       })),
       priceInfo,
     };

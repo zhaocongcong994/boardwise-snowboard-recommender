@@ -64,3 +64,21 @@ test("price source priority is official, authorized, then flagship", () => {
   assert.ok(priceSourcePriority("brand_official") < priceSourcePriority("authorized_retailer"));
   assert.ok(priceSourcePriority("authorized_retailer") < priceSourcePriority("official_flagship"));
 });
+
+test("accepts an unavailable style score without treating it as zero", () => {
+  const submission = {
+    ...validSubmission,
+    board: { ...validSubmission.board, styles: { ...validSubmission.board.styles, carving: null } },
+  };
+  assert.deepEqual(validateCatalogSubmission(submission), []);
+});
+
+test("requires an explicit null when an official style score is unavailable", () => {
+  const styles = { ...validSubmission.board.styles };
+  delete styles.carving;
+  const errors = validateCatalogSubmission({
+    ...validSubmission,
+    board: { ...validSubmission.board, styles },
+  });
+  assert.ok(errors.some((error) => error.includes("未知值请使用 null")));
+});

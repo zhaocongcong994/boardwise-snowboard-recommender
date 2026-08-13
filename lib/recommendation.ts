@@ -25,14 +25,14 @@ export type Board = {
   year: string;
   price: number;
   level: Level[];
-  styles: Record<Style, number>;
+  styles: Record<Style, number | null>;
   flex: number;
   profile: string;
   shape: string;
   source: string;
   updatedAt: string;
   color: string;
-  variants: Array<{ size: number; waist: number; weightMin: number; weightMax: number }>;
+  variants: Array<{ size: number; sizeLabel?: string; waist: number; weightMin: number; weightMax: number }>;
   priceInfo?: {
     amount: number;
     currency: "CNY";
@@ -65,7 +65,7 @@ export const PROFILE_LIMITS = {
     months: { min: 0, max: 120, label: "个月" },
     years: { min: 0, max: 50, label: "年" },
   },
-  budget: { min: 1500, max: 10000, step: 100 },
+  budget: { min: 1500, max: 100000, step: 100 },
 } as const;
 
 export type ProfileField = "height" | "weight" | "shoeValue" | "snowExperienceValue" | "budget";
@@ -293,7 +293,9 @@ export function recommend(profile: Profile, catalog: Board[] = boards): Recommen
 
     const variant = viable[0];
     const levelScore = board.level.includes(profile.level) ? 25 : 9;
-    const styleScore = board.styles[profile.style] * 2.5;
+    const verifiedStyleRating = board.styles[profile.style];
+    const styleRating = verifiedStyleRating ?? 5;
+    const styleScore = styleRating * 2.5;
     const flexDistance = Math.abs(board.flex - idealFlex(profile));
     const flexScore = Math.max(4, 20 - flexDistance * 5);
     const middle = (variant.weightMin + variant.weightMax) / 2;
@@ -305,9 +307,11 @@ export function recommend(profile: Profile, catalog: Board[] = boards): Recommen
     const score = levelScore + styleScore + flexScore + sizeScore + budgetScore + pastSeasonBonus;
 
     const reasons = [
-      `${variant.size} cm 尺寸覆盖你的体重区间 ${variant.weightMin}–${variant.weightMax} kg`,
+      `${variant.sizeLabel ?? variant.size} cm 尺寸覆盖你的体重区间 ${variant.weightMin}–${variant.weightMax} kg`,
       `${board.profile}配合 ${board.flex}/10 软硬度，适合${profile.level === "intermediate" ? "继续进阶" : "建立稳定控板"}`,
-      `${profile.style === "all-mountain" ? "全山适应" : profile.style === "carving" ? "雪道与刻滑" : profile.style === "freestyle" ? "平花与公园" : "粉雪"}匹配度 ${board.styles[profile.style]}/10`,
+      verifiedStyleRating === null || verifiedStyleRating === undefined
+        ? `${profile.style === "all-mountain" ? "全山适应" : profile.style === "carving" ? "雪道与刻滑" : profile.style === "freestyle" ? "平花与公园" : "粉雪"}暂无品牌单项评分，暂按中性基线计算`
+        : `${profile.style === "all-mountain" ? "全山适应" : profile.style === "carving" ? "雪道与刻滑" : profile.style === "freestyle" ? "平花与公园" : "粉雪"}匹配度 ${verifiedStyleRating}/10`,
     ];
 
     return [{

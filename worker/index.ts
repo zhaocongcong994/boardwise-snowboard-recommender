@@ -68,8 +68,8 @@ async function publishChange(db: D1Database, change: Record<string, unknown>, us
       styles_json=excluded.styles_json, flex=excluded.flex, profile=excluded.profile, shape=excluded.shape, color=excluded.color, status='published', updated_at=excluded.updated_at`)
       .bind(board.id, board.brand, board.model, board.year, JSON.stringify(board.level), JSON.stringify(board.styles), board.flex, board.profile, board.shape, board.color, now, now),
     db.prepare("DELETE FROM snowboard_variants WHERE board_id = ?").bind(board.id),
-    ...board.variants.map((variant) => db.prepare("INSERT INTO snowboard_variants (id, board_id, size, waist, weight_min, weight_max) VALUES (?, ?, ?, ?, ?, ?)")
-      .bind(`${board.id}-${variant.size}-${variant.waist}`, board.id, variant.size, variant.waist, variant.weightMin, variant.weightMax)),
+    ...board.variants.map((variant) => db.prepare("INSERT INTO snowboard_variants (id, board_id, size, size_label, waist, weight_min, weight_max) VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .bind(`${board.id}-${variant.size}-${variant.waist}`, board.id, variant.size, variant.sizeLabel ?? String(variant.size), variant.waist, variant.weightMin, variant.weightMax)),
     db.prepare(`INSERT INTO catalog_sources (id, board_id, source_type, source_name, url, verified_at, content_hash, is_official)
       VALUES (?, ?, 'brand_official', ?, ?, ?, ?, 1)
       ON CONFLICT(board_id, url) DO UPDATE SET source_name=excluded.source_name, verified_at=excluded.verified_at, content_hash=excluded.content_hash`)

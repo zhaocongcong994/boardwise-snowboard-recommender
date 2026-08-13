@@ -48,8 +48,8 @@ test("EU conversion covers supported limits without a silent fallback", () => {
   assert.ok(Number.isNaN(estimateMondo({ shoeMode: "daily-eu", shoeValue: 99 }).mondo));
 });
 
-test("caps budget and rejects values not aligned to 100 yuan", () => {
-  assert.match(validateProfile({ ...defaultProfile, budget: 10100 }).budget, /1,500–¥10,000/);
+test("caps budget at 100,000 yuan and rejects values not aligned to 100 yuan", () => {
+  assert.match(validateProfile({ ...defaultProfile, budget: 100100 }).budget, /1,500–¥100,000/);
   assert.match(validateProfile({ ...defaultProfile, budget: 3550 }).budget, /100 元/);
   assert.equal(recommend({ ...defaultProfile, budget: Number.POSITIVE_INFINITY }).length, 0);
 });

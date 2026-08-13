@@ -124,7 +124,7 @@ function Results({ profile, items, catalogMode, onRestart }: { profile: Profile;
             <div className="board-visual" style={{ "--board-color": item.board.color } as React.CSSProperties}>
               <span>{item.board.brand}</span>
               <i />
-              <b>{item.variant.size}</b>
+              <b>{item.variant.sizeLabel ?? item.variant.size}</b>
             </div>
             <div className="board-main">
               <div className="board-title-row">
@@ -135,7 +135,7 @@ function Results({ profile, items, catalogMode, onRestart }: { profile: Profile;
                 <div className="confidence"><small>匹配度</small><strong>{Math.min(98, Math.round(item.score))}%</strong></div>
               </div>
               <div className="spec-row">
-                <span><small>推荐长度</small><strong>{item.variant.size} cm</strong></span>
+                <span><small>推荐长度</small><strong>{item.variant.sizeLabel ?? item.variant.size} cm</strong></span>
                 <span><small>板腰</small><strong>{item.variant.waist} mm</strong></span>
                 <span><small>硬度</small><strong>{item.board.flex} / 10</strong></span>
                 <span><small>置信度</small><strong>{item.confidence}</strong></span>
