@@ -36,7 +36,11 @@
         "Soft & Playful 按项目统一分档映射为 3/10；该数字是标准化值，不是 Burton 原始数字。"
       ]
     },
-    "price": null
+    "crawlAttempts": [
+      { "sourceType": "official_flagship", "platform": "天猫", "sourceName": "品牌官方店铺检索", "sourceUrl": "https://www.tmall.com/", "status": "not_found", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "公开检索未找到可核验为 Burton 官方店铺且型号完全一致的商品页，因此未采集价格和主图。" },
+      { "sourceType": "brand_official", "platform": "Burton 官网", "sourceName": "Burton 官方网站 · Winter 2026", "sourceUrl": "https://www.burton.com/en-us/products/burton-cultivator-flat-top-snowboard-3028910-o", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 429.95, "currency": "USD" }, "message": "官网价格作为官方店铺未命中后的兜底展示价；官网图片不替代官方店铺主图。" }
+    ],
+    "price": { "amount": 429.95, "currency": "USD", "sourceType": "brand_official", "sourceName": "Burton 官方网站", "sourceUrl": "https://www.burton.com/en-us/products/burton-cultivator-flat-top-snowboard-3028910-o", "observedAt": "2026-08-13T13:30:00+08:00", "priceLabel": "官网展示价" }
   },
   {
     "board": {
@@ -74,6 +78,10 @@
         "first 与 beginner 是依据官网产品描述形成的审核前分类，不是 Nitro 页面中的结构化等级字段。"
       ]
     },
+    "crawlAttempts": [
+      { "sourceType": "official_flagship", "platform": "天猫", "sourceName": "品牌官方店铺检索", "sourceUrl": "https://www.tmall.com/", "status": "not_found", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "公开检索未找到可核验为 Nitro 官方店铺且型号完全一致的商品页，因此未采集价格和主图。" },
+      { "sourceType": "brand_official", "platform": "Nitro 官网", "sourceName": "Nitro 官方网站 · Prime Raw 2026", "sourceUrl": "https://www.nitrosnowboards.com/products/prime-raw-snowboard", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "官网页面提供规格但没有可采集的展示价格。" }
+    ],
     "price": null
   },
   {
@@ -115,7 +123,11 @@
         "beginner 与 intermediate 是依据官网描述形成的审核前分类，不是 Nidecker 页面中的结构化等级字段。"
       ]
     },
-    "price": null
+    "crawlAttempts": [
+      { "sourceType": "official_flagship", "platform": "天猫", "sourceName": "品牌官方店铺检索", "sourceUrl": "https://www.tmall.com/", "status": "not_found", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "公开检索未找到可核验为 Nidecker 官方店铺且型号完全一致的商品页，因此未采集价格和主图。" },
+      { "sourceType": "brand_official", "platform": "Nidecker 官网", "sourceName": "Nidecker 官方网站 · Merc 2026", "sourceUrl": "https://eu.nidecker.com/de/products/merc-2026", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 429.95, "currency": "CHF" }, "message": "官网价格作为官方店铺未命中后的兜底展示价；官网图片不替代官方店铺主图。" }
+    ],
+    "price": { "amount": 429.95, "currency": "CHF", "sourceType": "brand_official", "sourceName": "Nidecker 官方网站", "sourceUrl": "https://eu.nidecker.com/de/products/merc-2026", "observedAt": "2026-08-13T13:30:00+08:00", "priceLabel": "官网展示价" }
   },
   {
     "board": {
@@ -155,6 +167,10 @@
         "beginner 与 intermediate 是依据官网描述形成的审核前分类，不是 Rome 页面中的结构化等级字段。"
       ]
     },
-    "price": null
+    "crawlAttempts": [
+      { "sourceType": "official_flagship", "platform": "天猫", "sourceName": "品牌官方店铺检索", "sourceUrl": "https://www.tmall.com/", "status": "not_found", "checkedAt": "2026-08-13T13:30:00+08:00", "message": "公开检索未找到可核验为 Rome 官方店铺且型号完全一致的商品页，因此未采集价格和主图。" },
+      { "sourceType": "brand_official", "platform": "Rome 官网", "sourceName": "Rome 官方网站 · Warden 2025/2026", "sourceUrl": "https://romesnowboards.com/products/rome-warden-2526-mens-snowboard", "status": "matched", "checkedAt": "2026-08-13T13:30:00+08:00", "rawPrice": { "amount": 328.95, "currency": "USD" }, "message": "官网价格作为官方店铺未命中后的兜底展示价；官网图片不替代官方店铺主图。" }
+    ],
+    "price": { "amount": 328.95, "currency": "USD", "sourceType": "brand_official", "sourceName": "Rome 官方网站", "sourceUrl": "https://romesnowboards.com/products/rome-warden-2526-mens-snowboard", "observedAt": "2026-08-13T13:30:00+08:00", "priceLabel": "官网展示价" }
   }
 ]

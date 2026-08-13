@@ -10,10 +10,14 @@ import {
   ProfileField,
   ProfileValidationErrors,
   Recommendation,
+  SelectionGuide,
   ShoeMode,
   Style,
   validateProfile,
 } from "../lib/recommendation";
+
+const currencySymbols: Record<string, string> = { CNY: "¥", USD: "$", EUR: "€", GBP: "£", JPY: "¥", CHF: "CHF ", CAD: "CA$" };
+const formatPrice = (amount: number, currency: string) => `${currencySymbols[currency] ?? `${currency} `}${amount.toLocaleString("zh-CN", { maximumFractionDigits: 2 })}`;
 
 const steps = ["身体与脚型", "技术能力", "滑行偏好", "预算确认"];
 const stepFields: ProfileField[][] = [
@@ -40,7 +44,7 @@ function OptionCard({ active, title, copy, onClick }: { active: boolean; title: 
   );
 }
 
-function Results({ profile, items, catalogMode, onRestart }: { profile: Profile; items: Recommendation[]; catalogMode: "demo" | "database"; onRestart: () => void }) {
+function Results({ profile, guide, items, catalogMode, onRestart }: { profile: Profile; guide: SelectionGuide; items: Recommendation[]; catalogMode: "demo" | "database"; onRestart: () => void }) {
   const shoe = estimateMondo(profile);
   const [aiCopy, setAiCopy] = useState("正在整理你的个性化选板结论…");
   const [feedback, setFeedback] = useState<"idle" | "sending" | "done">("idle");
@@ -114,17 +118,27 @@ function Results({ profile, items, catalogMode, onRestart }: { profile: Profile;
         </aside>
       )}
 
+      <section className="selection-guide">
+        <div className="section-heading"><span className="eyebrow dark">YOUR BOARD PARAMETERS</span><h2>先记住这组选择范围。</h2></div>
+        <div className="guide-grid">
+          <article><small>建议硬度</small><strong>{guide.flex.min}–{guide.flex.max}<i>/10</i></strong><span>优先试 {guide.flex.target}/10</span></article>
+          <article><small>建议长度</small><strong>{guide.length.min}–{guide.length.max}<i>cm</i></strong><span>中心值 {guide.length.target} cm</span></article>
+          <article><small>最低板腰</small><strong>{guide.minimumWaist}<i>mm</i></strong><span>{shoe.estimated ? "需用雪鞋复核" : "脚长已参与计算"}</span></article>
+          <article><small>优先板型</small><strong className="guide-copy">{guide.shape}</strong><span>{guide.profile}</span></article>
+        </div>
+        <ul className="guide-notes">{guide.notes.map((note) => <li key={note}>{note}</li>)}</ul>
+      </section>
+
       <section className="recommendation-list">
+        <div className="product-reference-heading"><span className="eyebrow dark">PRODUCT REFERENCES</span><h2>具体型号仅作参数匹配参考</h2><p>先按上面的硬度、长度、板腰和板型筛选，再比较库存、价格与售后。</p></div>
         {items.map((item, index) => (
           <article className={`board-card board-${index + 1}`} key={item.board.id}>
             <div className="rank-column">
               <span className="rank">0{index + 1}</span>
               <span className="role">{item.role}</span>
             </div>
-            <div className="board-visual" style={{ "--board-color": item.board.color } as React.CSSProperties}>
-              <span>{item.board.brand}</span>
-              <i />
-              <b>{item.variant.sizeLabel ?? item.variant.size}</b>
+            <div className={`board-visual ${item.board.imageInfo ? "has-product-image" : "no-product-image"}`}>
+              {item.board.imageInfo ? <img /* eslint-disable-line @next/next/no-img-element */ src={item.board.imageInfo.imageUrl} alt={`${item.board.brand} ${item.board.model} 官方店铺商品主图`} /> : <span>暂未获取<br />官方店铺主图</span>}
             </div>
             <div className="board-main">
               <div className="board-title-row">
@@ -143,7 +157,7 @@ function Results({ profile, items, catalogMode, onRestart }: { profile: Profile;
               <ul>{item.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>
               <div className="caution"><b>购买前确认</b>{item.caution}</div>
               <footer>
-                <div>{item.board.priceInfo ? <><small>{item.board.priceInfo.priceLabel} · {new Date(item.board.priceInfo.observedAt).toLocaleDateString("zh-CN")} 核验</small><strong>¥{item.board.priceInfo.amount.toLocaleString("zh-CN")}</strong><a className="price-source" href={item.board.priceInfo.sourceUrl} target="_blank" rel="noreferrer">{item.board.priceInfo.sourceName} ↗</a></> : catalogMode === "demo" ? <><small>演示参考价</small><strong>¥{item.board.price.toLocaleString("zh-CN")}</strong></> : <><small>价格</small><strong className="no-price">暂无已核验价格</strong></>}</div>
+                <div>{item.board.priceInfo ? <><small>{item.board.priceInfo.priceLabel} · {new Date(item.board.priceInfo.observedAt).toLocaleDateString("zh-CN")} 核验</small><strong>{formatPrice(item.board.priceInfo.amount, item.board.priceInfo.currency)}</strong><a className="price-source" href={item.board.priceInfo.sourceUrl} target="_blank" rel="noreferrer">{item.board.priceInfo.sourceName} ↗</a></> : catalogMode === "demo" ? <><small>演示参考价</small><strong>¥{item.board.price.toLocaleString("zh-CN")}</strong></> : <><small>价格</small><strong className="no-price">暂未获取到价格</strong></>}</div>
                 <span>{item.board.profile} · {item.board.shape}</span>
               </footer>
             </div>
@@ -160,7 +174,7 @@ function Results({ profile, items, catalogMode, onRestart }: { profile: Profile;
           <div className="compare-row compare-head"><span>型号</span>{items.map((item) => <b key={item.board.id}>{item.board.model}</b>)}</div>
           <div className="compare-row"><span>定位</span>{items.map((item) => <b key={item.board.id}>{item.role}</b>)}</div>
           <div className="compare-row"><span>板型</span>{items.map((item) => <b key={item.board.id}>{item.board.shape}</b>)}</div>
-          <div className="compare-row"><span>价格</span>{items.map((item) => <b key={item.board.id}>{item.board.priceInfo ? `¥${item.board.priceInfo.amount}` : catalogMode === "demo" ? `¥${item.board.price}` : "待核验"}</b>)}</div>
+          <div className="compare-row"><span>价格</span>{items.map((item) => <b key={item.board.id}>{item.board.priceInfo ? formatPrice(item.board.priceInfo.amount, item.board.priceInfo.currency) : catalogMode === "demo" ? `¥${item.board.price}` : "暂未获取到价格"}</b>)}</div>
         </div>
       </section>
 
@@ -183,6 +197,7 @@ export default function RecommendationApp() {
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const [results, setResults] = useState<Recommendation[] | null>(null);
+  const [selectionGuide, setSelectionGuide] = useState<SelectionGuide | null>(null);
   const [errors, setErrors] = useState<ProfileValidationErrors>({});
   const [catalogMode, setCatalogMode] = useState<"demo" | "database">("demo");
   const [submitting, setSubmitting] = useState(false);
@@ -228,6 +243,7 @@ export default function RecommendationApp() {
         if (!response.ok) throw new Error(data.error || "推荐服务暂时不可用");
         setCatalogMode(data.catalogMode);
         setResults(data.recommendations);
+        setSelectionGuide(data.selectionGuide);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (reason) {
         setSubmitError(reason instanceof Error ? reason.message : "推荐服务暂时不可用");
@@ -239,6 +255,7 @@ export default function RecommendationApp() {
 
   function restart() {
     setResults(null);
+    setSelectionGuide(null);
     setStarted(true);
     setStep(0);
     setErrors({});
@@ -246,7 +263,7 @@ export default function RecommendationApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  if (results) return <Results profile={profile} items={results} catalogMode={catalogMode} onRestart={restart} />;
+  if (results && selectionGuide) return <Results profile={profile} guide={selectionGuide} items={results} catalogMode={catalogMode} onRestart={restart} />;
 
   if (!started) {
     return (

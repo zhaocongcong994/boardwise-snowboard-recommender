@@ -33,7 +33,7 @@ const validSubmission = {
     sourceName: "Example 官方网站",
     sourceUrl: "https://example.com/cn/boards/exact-model",
     observedAt: "2026-08-13T00:00:00.000Z",
-    priceLabel: "官网价",
+    priceLabel: "官网展示价",
   },
 };
 
@@ -41,7 +41,7 @@ test("accepts a fully sourced adult resort board submission", () => {
   assert.deepEqual(validateCatalogSubmission(validSubmission), []);
 });
 
-test("rejects foreign currency, unsafe dimensions and non-HTTPS sources", () => {
+test("accepts original foreign currency while rejecting unsafe dimensions and non-HTTPS sources", () => {
   const errors = validateCatalogSubmission({
     ...validSubmission,
     board: { ...validSubmission.board, variants: [{ size: 199, waist: 150, weightMin: 90, weightMax: 20 }] },
@@ -49,7 +49,7 @@ test("rejects foreign currency, unsafe dimensions and non-HTTPS sources", () => 
     price: { ...validSubmission.price, currency: "USD" },
   });
   assert.ok(errors.some((error) => error.includes("HTTPS")));
-  assert.ok(errors.some((error) => error.includes("人民币")));
+  assert.ok(!errors.some((error) => error.includes("人民币")));
   assert.ok(errors.some((error) => error.includes("成人场地板")));
   assert.ok(errors.some((error) => error.includes("板腰")));
   assert.ok(errors.some((error) => error.includes("承重")));
@@ -60,9 +60,9 @@ test("normalizes exact catalog identity without fuzzy matching", () => {
   assert.notEqual(catalogIdentity("Burton", "Custom", "25/26"), catalogIdentity("Burton", "Custom Camber", "25/26"));
 });
 
-test("price source priority is official, authorized, then flagship", () => {
+test("price source priority is official flagship, brand site, then authorized retailer", () => {
+  assert.ok(priceSourcePriority("official_flagship") < priceSourcePriority("brand_official"));
   assert.ok(priceSourcePriority("brand_official") < priceSourcePriority("authorized_retailer"));
-  assert.ok(priceSourcePriority("authorized_retailer") < priceSourcePriority("official_flagship"));
 });
 
 test("accepts an unavailable style score without treating it as zero", () => {
@@ -81,4 +81,21 @@ test("requires an explicit null when an official style score is unavailable", ()
     board: { ...validSubmission.board, styles },
   });
   assert.ok(errors.some((error) => error.includes("未知值请使用 null")));
+});
+
+test("only accepts product images from a verified official flagship source", () => {
+  const errors = validateCatalogSubmission({
+    ...validSubmission,
+    board: {
+      ...validSubmission.board,
+      imageInfo: {
+        imageUrl: "https://example.com/board.jpg",
+        sourceUrl: "https://example.com/item",
+        sourceName: "第三方店铺",
+        sourceType: "authorized_retailer",
+        observedAt: "2026-08-13T00:00:00.000Z",
+      },
+    },
+  });
+  assert.ok(errors.some((error) => error.includes("只能来自品牌官方店铺")));
 });

@@ -1,14 +1,20 @@
 {
-  "policyVersion": 1,
+  "policyVersion": 2,
   "updatedAt": "2026-08-13",
-  "pricePriority": ["brand_official", "authorized_retailer", "official_flagship"],
+  "pricePriority": ["official_flagship", "brand_official", "authorized_retailer"],
   "rules": {
-    "acceptedCurrency": "CNY",
+    "acceptedCurrencies": ["CNY", "USD", "EUR", "GBP", "JPY", "CHF", "CAD"],
     "priceMaxAgeDays": 14,
     "requireExactBrandModelSeason": true,
     "automaticPublishing": false,
-    "foreignOfficialPrice": "skip"
+    "foreignOfficialPrice": "display_without_conversion",
+    "productImageSource": "official_flagship_only",
+    "missingPriceCopy": "暂未获取到价格"
   },
+  "commercePlatforms": [
+    { "platform": "天猫", "domains": ["tmall.com"], "requireOfficialStoreProof": true },
+    { "platform": "京东", "domains": ["jd.com"], "requireOfficialStoreProof": true }
+  ],
   "brands": [
     { "brand": "Burton", "officialDomains": ["burton.com"] },
     { "brand": "Salomon", "officialDomains": ["salomon.com"] },

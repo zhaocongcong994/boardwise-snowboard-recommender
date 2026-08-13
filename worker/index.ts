@@ -2,7 +2,7 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { loadPublishedCatalog, validateCatalogSubmission, type CatalogSubmission } from "../lib/catalog";
-import { boards, recommend, validateProfile, type Profile } from "../lib/recommendation";
+import { boards, buildSelectionGuide, recommend, validateProfile, type Profile } from "../lib/recommendation";
 
 interface Env {
   ASSETS: Fetcher;
@@ -60,13 +60,16 @@ async function publishChange(db: D1Database, change: Record<string, unknown>, us
   if (errors.length) return Response.json({ error: "数据未通过发布校验", details: errors }, { status: 400 });
 
   const { board, specificationSource, price } = submission;
+  const imageInfo = board.imageInfo;
   const now = new Date().toISOString();
   const statements = [
-    db.prepare(`INSERT INTO snowboard_models (id, brand, model, season, audience, levels_json, styles_json, flex, profile, shape, color, status, published_at, updated_at)
-      VALUES (?, ?, ?, ?, 'adult', ?, ?, ?, ?, ?, ?, 'published', ?, ?)
+    db.prepare(`INSERT INTO snowboard_models (id, brand, model, season, audience, levels_json, styles_json, flex, profile, shape, color, image_url, image_source_url, image_source_name, image_observed_at, status, published_at, updated_at)
+      VALUES (?, ?, ?, ?, 'adult', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?, ?)
       ON CONFLICT(id) DO UPDATE SET brand=excluded.brand, model=excluded.model, season=excluded.season, levels_json=excluded.levels_json,
-      styles_json=excluded.styles_json, flex=excluded.flex, profile=excluded.profile, shape=excluded.shape, color=excluded.color, status='published', updated_at=excluded.updated_at`)
-      .bind(board.id, board.brand, board.model, board.year, JSON.stringify(board.level), JSON.stringify(board.styles), board.flex, board.profile, board.shape, board.color, now, now),
+      styles_json=excluded.styles_json, flex=excluded.flex, profile=excluded.profile, shape=excluded.shape, color=excluded.color,
+      image_url=excluded.image_url, image_source_url=excluded.image_source_url, image_source_name=excluded.image_source_name, image_observed_at=excluded.image_observed_at,
+      status='published', updated_at=excluded.updated_at`)
+      .bind(board.id, board.brand, board.model, board.year, JSON.stringify(board.level), JSON.stringify(board.styles), board.flex, board.profile, board.shape, board.color, imageInfo?.imageUrl ?? null, imageInfo?.sourceUrl ?? null, imageInfo?.sourceName ?? null, imageInfo?.observedAt ?? null, now, now),
     db.prepare("DELETE FROM snowboard_variants WHERE board_id = ?").bind(board.id),
     ...board.variants.map((variant) => db.prepare("INSERT INTO snowboard_variants (id, board_id, size, size_label, waist, weight_min, weight_max) VALUES (?, ?, ?, ?, ?, ?, ?)")
       .bind(`${board.id}-${variant.size}-${variant.waist}`, board.id, variant.size, variant.sizeLabel ?? String(variant.size), variant.waist, variant.weightMin, variant.weightMax)),
@@ -84,8 +87,8 @@ async function publishChange(db: D1Database, change: Record<string, unknown>, us
         VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(board_id, url) DO UPDATE SET source_type=excluded.source_type, source_name=excluded.source_name, verified_at=excluded.verified_at, is_official=excluded.is_official`)
         .bind(sourceId, board.id, price.sourceType, price.sourceName, price.sourceUrl, price.observedAt, price.sourceType !== "authorized_retailer" ? 1 : 0),
-      db.prepare("INSERT INTO price_snapshots (id, board_id, source_id, amount, currency, availability, observed_at, expires_at) VALUES (?, ?, ?, ?, 'CNY', 'in_stock', ?, ?)")
-        .bind(crypto.randomUUID(), board.id, sourceId, price.amount, price.observedAt, expiresAt),
+      db.prepare("INSERT INTO price_snapshots (id, board_id, source_id, amount, currency, availability, observed_at, expires_at) VALUES (?, ?, ?, ?, ?, 'in_stock', ?, ?)")
+        .bind(crypto.randomUUID(), board.id, sourceId, price.amount, price.currency, price.observedAt, expiresAt),
     );
   }
 
@@ -127,7 +130,7 @@ const worker = {
         } catch (error) {
           if (env.CATALOG_MODE === "database") throw error;
         }
-        return Response.json({ recommendations: recommend(profile, catalog), catalogMode, generatedAt: new Date().toISOString() });
+        return Response.json({ selectionGuide: buildSelectionGuide(profile), recommendations: recommend(profile, catalog), catalogMode, generatedAt: new Date().toISOString() });
       } catch {
         return Response.json({ error: "推荐服务暂时不可用" }, { status: 503 });
       }
@@ -150,9 +153,15 @@ const worker = {
       const payloadJson = JSON.stringify(submission);
       const contentHash = await sha256(payloadJson);
       const identityKey = `${submission.board.brand.trim().toLocaleLowerCase("en-US")}::${submission.board.model.trim().toLocaleLowerCase("en-US")}::${submission.board.year}::adult`;
+      const pending = await env.DB.prepare("SELECT id FROM catalog_changes WHERE identity_key = ? AND status = 'pending' LIMIT 1").bind(identityKey).first<{ id: string }>();
+      if (pending) {
+        await env.DB.prepare("UPDATE catalog_changes SET payload_json=?, source_url=?, content_hash=?, collected_at=? WHERE id=?")
+          .bind(payloadJson, submission.specificationSource.sourceUrl, contentHash, new Date().toISOString(), pending.id).run();
+        return Response.json({ ok: true, contentHash, action: "updated" }, { status: 200 });
+      }
       await env.DB.prepare("INSERT OR IGNORE INTO catalog_changes (id, identity_key, change_type, payload_json, source_url, content_hash, status, collected_at) VALUES (?, ?, 'upsert', ?, ?, ?, 'pending', ?)")
         .bind(crypto.randomUUID(), identityKey, payloadJson, submission.specificationSource.sourceUrl, contentHash, new Date().toISOString()).run();
-      return Response.json({ ok: true, contentHash }, { status: 201 });
+      return Response.json({ ok: true, contentHash, action: "created" }, { status: 201 });
     }
 
     const reviewMatch = url.pathname.match(/^\/api\/admin\/catalog\/changes\/([^/]+)\/review$/);

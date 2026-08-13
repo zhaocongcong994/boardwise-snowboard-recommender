@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import type { CatalogSubmission } from "../../../lib/catalog";
 
+const crawlStatusLabels = { matched: "已命中", not_found: "未命中", blocked: "访问受限", error: "采集失败" } as const;
+const money = (amount: number, currency: string) => `${currency} ${amount.toLocaleString("zh-CN", { maximumFractionDigits: 2 })}`;
+
 type Change = {
   id: string;
   identity_key: string;
@@ -49,11 +52,20 @@ function ChangeCard({ change, onReviewed }: { change: Change; onReviewed: () => 
       <dl className="review-specs">
         <div><dt>板型</dt><dd>{payload.board.profile} · {payload.board.shape}</dd></div>
         <div><dt>硬度</dt><dd>{payload.board.flex} / 10</dd></div>
-        <div><dt>价格</dt><dd>{payload.price ? `¥${payload.price.amount.toLocaleString("zh-CN")} · ${payload.price.priceLabel}` : "暂无已核验价格"}</dd></div>
+        <div><dt>价格</dt><dd>{payload.price ? `${money(payload.price.amount, payload.price.currency)} · ${payload.price.priceLabel}` : "暂未获取到价格"}</dd></div>
         <div><dt>采集时间</dt><dd>{new Date(change.collected_at).toLocaleString("zh-CN")}</dd></div>
       </dl>
       <div className="variant-preview">{payload.board.variants.map((variant) => <span key={`${variant.size}-${variant.waist}`}>{variant.sizeLabel ?? variant.size} cm · {variant.waist} mm · {variant.weightMin}–{variant.weightMax} kg</span>)}</div>
       {payload.specificationSource.normalizationNotes?.length ? <div className="normalization-notes"><b>标准化说明</b><ul>{payload.specificationSource.normalizationNotes.map((note) => <li key={note}>{note}</li>)}</ul></div> : null}
+      <section className="crawl-results">
+        <div className="crawl-results-title"><b>爬虫结果</b><span>{payload.crawlAttempts?.length ?? 0} 个来源</span></div>
+        {payload.crawlAttempts?.length ? payload.crawlAttempts.map((attempt) => (
+          <article key={`${attempt.sourceType}-${attempt.sourceUrl}`}>
+            {attempt.imageUrl ? <img /* eslint-disable-line @next/next/no-img-element */ src={attempt.imageUrl} alt={`${payload.board.brand} ${payload.board.model} 采集主图`} /> : <div className="crawl-image-empty">无主图</div>}
+            <div><strong>{attempt.platform} · {attempt.sourceName}</strong><span className={`crawl-status status-${attempt.status}`}>{crawlStatusLabels[attempt.status]}</span><small>{attempt.rawPrice ? `原始价格 ${money(attempt.rawPrice.amount, attempt.rawPrice.currency)}` : attempt.message ?? "未获取价格"}</small><a href={attempt.sourceUrl} target="_blank" rel="noreferrer">打开采集来源 ↗</a></div>
+          </article>
+        )) : <p>这条旧数据没有保存采集尝试记录。</p>}
+      </section>
       <div className="source-links">
         <a href={payload.specificationSource.sourceUrl} target="_blank" rel="noreferrer">查看规格来源 ↗</a>
         {payload.price && payload.price.sourceUrl !== payload.specificationSource.sourceUrl && <a href={payload.price.sourceUrl} target="_blank" rel="noreferrer">查看价格来源 ↗</a>}

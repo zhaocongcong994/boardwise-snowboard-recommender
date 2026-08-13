@@ -2,6 +2,7 @@ export type Level = "first" | "beginner" | "intermediate";
 export type Style = "all-mountain" | "carving" | "freestyle" | "powder";
 export type ShoeMode = "foot" | "mondo" | "daily-eu";
 export type ExperienceUnit = "days" | "months" | "years";
+export type SupportedCurrency = "CNY" | "USD" | "EUR" | "GBP" | "JPY" | "CHF" | "CAD";
 
 export type Profile = {
   height: number;
@@ -33,15 +34,31 @@ export type Board = {
   updatedAt: string;
   color: string;
   variants: Array<{ size: number; sizeLabel?: string; waist: number; weightMin: number; weightMax: number }>;
+  imageInfo?: {
+    imageUrl: string;
+    sourceUrl: string;
+    sourceName: string;
+    sourceType: "official_flagship";
+    observedAt: string;
+  } | null;
   priceInfo?: {
     amount: number;
-    currency: "CNY";
+    currency: SupportedCurrency;
     sourceType: "brand_official" | "authorized_retailer" | "official_flagship";
     sourceName: string;
     sourceUrl: string;
     observedAt: string;
-    priceLabel: "官网价" | "授权店参考价" | "官方旗舰店参考价";
+    priceLabel: "官网展示价" | "授权店参考价" | "官方店铺价";
   } | null;
+};
+
+export type SelectionGuide = {
+  flex: { target: number; min: number; max: number };
+  length: { target: number; min: number; max: number };
+  minimumWaist: number;
+  profile: string;
+  shape: string;
+  notes: string[];
 };
 
 export type Recommendation = {
@@ -263,17 +280,45 @@ export function estimateMondo(profile: Pick<Profile, "shoeMode" | "shoeValue">) 
   return { mondo: profile.shoeValue, estimated: false };
 }
 
-function requiredWaist(mondo: number) {
+export function requiredWaist(mondo: number) {
   if (mondo >= 29) return 263;
   if (mondo >= 28) return 258;
   if (mondo >= 27) return 252;
   return 244;
 }
 
-function idealFlex(profile: Profile) {
+export function idealFlex(profile: Profile) {
   const levelBase = profile.level === "first" ? 3 : profile.level === "beginner" ? 4 : 5;
   const feelDelta = profile.feel === "easy" ? -1 : profile.feel === "stable" ? 1 : 0;
   return Math.max(2, Math.min(7, levelBase + feelDelta));
+}
+
+export function buildSelectionGuide(profile: Profile): SelectionGuide {
+  const { mondo, estimated } = estimateMondo(profile);
+  const flex = idealFlex(profile);
+  const lengthBase = Math.round(138 + (profile.weight - 35) * 0.42);
+  const styleDelta = profile.style === "freestyle" ? -2 : profile.style === "powder" ? 3 : 0;
+  const target = Math.max(135, Math.min(165, lengthBase + styleDelta));
+  const profileLabel = profile.level === "first"
+    ? "平拱、反拱或带抬升接触点的柔和混合拱"
+    : profile.style === "carving"
+      ? "传统正拱或偏正拱混合结构"
+      : profile.style === "powder"
+        ? "鼻端抬升明显的方向性混合拱"
+        : "容错型混合拱";
+  const shape = profile.style === "freestyle" ? "True Twin / Directional Twin" : profile.style === "powder" ? "Directional" : "Directional Twin";
+  return {
+    flex: { target: flex, min: Math.max(2, flex - 1), max: Math.min(8, flex + 1) },
+    length: { target, min: target - 3, max: target + 3 },
+    minimumWaist: requiredWaist(mondo),
+    profile: profileLabel,
+    shape,
+    notes: [
+      `长度先看体重与玩法，建议从 ${target - 3}–${target + 3} cm 试起，不用只按身高选板。`,
+      `硬度建议 ${Math.max(2, flex - 1)}–${Math.min(8, flex + 1)}/10；目标值 ${flex}/10。`,
+      estimated ? "板腰由日常鞋码估算，下单前需要用实际雪鞋外壳长度复核。" : "板腰已按脚长 / Mondo 计算，仍建议结合雪鞋外壳与站姿角度复核。",
+    ],
+  };
 }
 
 export function recommend(profile: Profile, catalog: Board[] = boards): Recommendation[] {
@@ -300,7 +345,8 @@ export function recommend(profile: Profile, catalog: Board[] = boards): Recommen
     const flexScore = Math.max(4, 20 - flexDistance * 5);
     const middle = (variant.weightMin + variant.weightMax) / 2;
     const sizeScore = Math.max(6, 15 - Math.abs(profile.weight - middle) * 0.8);
-    const budgetScore = board.price <= profile.budget
+    const budgetComparable = !board.priceInfo || board.priceInfo.currency === "CNY";
+    const budgetScore = !budgetComparable ? 5 : board.price <= profile.budget
       ? 10
       : Math.max(0, 10 - ((board.price - profile.budget) / 300));
     const pastSeasonBonus = profile.acceptPastSeason ? 5 : 3;
@@ -329,7 +375,7 @@ export function recommend(profile: Profile, catalog: Board[] = boards): Recommen
     }];
   }).sort((a, b) => b.score - a.score);
 
-  const withinBudget = candidates.filter((item) => item.board.price <= profile.budget);
+  const withinBudget = candidates.filter((item) => item.board.priceInfo?.currency !== "CNY" || item.board.price <= profile.budget);
   const primary = withinBudget[0] ?? candidates[0];
   if (!primary) return [];
   const growth = candidates.find((item) => item.board.id !== primary.board.id && item.board.flex >= primary.board.flex) ?? candidates[1];

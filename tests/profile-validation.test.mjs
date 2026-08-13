@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   defaultProfile,
+  buildSelectionGuide,
   estimateMondo,
   recommend,
   validateProfile,
@@ -52,4 +53,12 @@ test("caps budget at 100,000 yuan and rejects values not aligned to 100 yuan", (
   assert.match(validateProfile({ ...defaultProfile, budget: 100100 }).budget, /1,500–¥100,000/);
   assert.match(validateProfile({ ...defaultProfile, budget: 3550 }).budget, /100 元/);
   assert.equal(recommend({ ...defaultProfile, budget: Number.POSITIVE_INFINITY }).length, 0);
+});
+
+test("returns reusable board parameters before product matches", () => {
+  const guide = buildSelectionGuide(defaultProfile);
+  assert.equal(guide.flex.target, 4);
+  assert.ok(guide.length.min < guide.length.max);
+  assert.equal(guide.minimumWaist, 244);
+  assert.match(guide.notes[0], /长度先看体重/);
 });

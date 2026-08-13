@@ -1,6 +1,18 @@
-import type { Board } from "./recommendation";
+import type { Board, SupportedCurrency } from "./recommendation";
 
-export type PriceSourceType = "brand_official" | "authorized_retailer" | "official_flagship";
+export type PriceSourceType = "official_flagship" | "brand_official" | "authorized_retailer";
+
+export type CrawlAttempt = {
+  sourceType: "official_flagship" | "brand_official";
+  platform: string;
+  sourceName: string;
+  sourceUrl: string;
+  status: "matched" | "not_found" | "blocked" | "error";
+  checkedAt: string;
+  rawPrice?: { amount: number; currency: SupportedCurrency };
+  imageUrl?: string;
+  message?: string;
+};
 
 export type CatalogPrice = NonNullable<Board["priceInfo"]>;
 
@@ -16,15 +28,16 @@ export type CatalogSubmission = {
     fieldEvidence?: Record<string, string>;
     normalizationNotes?: string[];
   };
+  crawlAttempts?: CrawlAttempt[];
   price: CatalogPrice | null;
 };
 
 const catalogStyles = ["all-mountain", "carving", "freestyle", "powder"] as const;
 
 const pricePriority: Record<PriceSourceType, number> = {
-  brand_official: 1,
-  authorized_retailer: 2,
-  official_flagship: 3,
+  official_flagship: 1,
+  brand_official: 2,
+  authorized_retailer: 3,
 };
 
 export function priceSourcePriority(sourceType: PriceSourceType) {
@@ -43,6 +56,10 @@ export function validateCatalogSubmission(input: CatalogSubmission): string[] {
   if (!specificationSource.sourceUrl.startsWith("https://")) errors.push("规格来源必须是 HTTPS URL");
   if (!board.variants.length) errors.push("至少需要一个已核验尺码");
   if (board.flex < 1 || board.flex > 10) errors.push("硬度必须在 1–10 之间");
+  if (board.imageInfo) {
+    if (board.imageInfo.sourceType !== "official_flagship") errors.push("商品主图只能来自品牌官方店铺");
+    if (!board.imageInfo.imageUrl.startsWith("https://") || !board.imageInfo.sourceUrl.startsWith("https://")) errors.push("商品主图与店铺来源必须是 HTTPS URL");
+  }
   for (const style of catalogStyles) {
     const score = board.styles[style];
     if (score === undefined) {
@@ -57,10 +74,13 @@ export function validateCatalogSubmission(input: CatalogSubmission): string[] {
     if (variant.weightMin < 30 || variant.weightMax > 180 || variant.weightMin >= variant.weightMax) errors.push(`尺码 ${variant.size} 的承重范围无效`);
   }
   if (price) {
-    if (price.currency !== "CNY") errors.push("仅允许人民币价格");
-    if (!Number.isInteger(price.amount) || price.amount <= 0 || price.amount > 50000) errors.push("价格必须是 1–50,000 元的整数");
+    if (!Number.isFinite(price.amount) || price.amount <= 0 || price.amount > 1000000) errors.push("价格必须是 0–1,000,000 之间的有效数字");
     if (!price.sourceUrl.startsWith("https://")) errors.push("价格来源必须是 HTTPS URL");
     if (!(price.sourceType in pricePriority)) errors.push("价格来源类型无效");
+  }
+  for (const attempt of input.crawlAttempts ?? []) {
+    if (!attempt.sourceUrl.startsWith("https://")) errors.push("爬虫来源必须是 HTTPS URL");
+    if (attempt.imageUrl && attempt.sourceType !== "official_flagship") errors.push("非官方店铺爬虫结果不得提供推荐主图");
   }
   return [...new Set(errors)];
 }
@@ -74,7 +94,7 @@ export async function loadPublishedCatalog(db: D1Database, now = new Date()): Pr
     SELECT p.*, s.source_type, s.source_name, s.url
     FROM price_snapshots p
     JOIN catalog_sources s ON s.id = p.source_id
-    WHERE p.currency = 'CNY' AND p.availability = 'in_stock' AND p.expires_at > ?
+    WHERE p.availability = 'in_stock' AND p.expires_at > ?
     ORDER BY p.observed_at DESC
   `).bind(now.toISOString()).all<D1Row>();
 
@@ -86,12 +106,12 @@ export async function loadPublishedCatalog(db: D1Database, now = new Date()): Pr
     const sourceType = selected?.source_type as PriceSourceType | undefined;
     const priceInfo: CatalogPrice | null = selected && sourceType ? {
       amount: Number(selected.amount),
-      currency: "CNY",
+      currency: String(selected.currency) as CatalogPrice["currency"],
       sourceType,
       sourceName: String(selected.source_name),
       sourceUrl: String(selected.url),
       observedAt: String(selected.observed_at),
-      priceLabel: sourceType === "brand_official" ? "官网价" : sourceType === "authorized_retailer" ? "授权店参考价" : "官方旗舰店参考价",
+      priceLabel: sourceType === "brand_official" ? "官网展示价" : sourceType === "authorized_retailer" ? "授权店参考价" : "官方店铺价",
     } : null;
     return {
       id: String(row.id),
@@ -107,6 +127,13 @@ export async function loadPublishedCatalog(db: D1Database, now = new Date()): Pr
       source: priceInfo?.sourceName ?? "暂无已核验价格",
       updatedAt: priceInfo?.observedAt ?? String(row.updated_at),
       color: String(row.color),
+      imageInfo: row.image_url ? {
+        imageUrl: String(row.image_url),
+        sourceUrl: String(row.image_source_url),
+        sourceName: String(row.image_source_name),
+        sourceType: "official_flagship",
+        observedAt: String(row.image_observed_at),
+      } : null,
       variants: variants.results.filter((variant) => variant.board_id === row.id).map((variant) => ({
         size: Number(variant.size), sizeLabel: variant.size_label ? String(variant.size_label) : undefined, waist: Number(variant.waist), weightMin: Number(variant.weight_min), weightMax: Number(variant.weight_max),
       })),
