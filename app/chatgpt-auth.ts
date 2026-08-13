@@ -22,7 +22,19 @@ export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
   const requestHeaders = await headers();
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);
-  if (!userId || !email) return null;
+  if (!userId || !email) {
+    const host = requestHeaders.get("host")?.split(":")[0];
+    const localEmail = process.env.LOCAL_ADMIN_EMAIL?.trim();
+    if (process.env.NODE_ENV !== "production" && localEmail && (host === "localhost" || host === "127.0.0.1")) {
+      return {
+        userId: "local-boardwise-admin",
+        displayName: "本地调试管理员",
+        email: localEmail,
+        fullName: "本地调试管理员",
+      };
+    }
+    return null;
+  }
 
   const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
   const fullName =

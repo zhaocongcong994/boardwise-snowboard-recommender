@@ -10,6 +10,7 @@ interface Env {
   DIFY_API_KEY?: string;
   DIFY_API_URL?: string;
   ADMIN_EMAILS?: string;
+  LOCAL_ADMIN_EMAIL?: string;
   CATALOG_MODE?: "demo" | "database";
   IMAGES: {
     input(stream: ReadableStream): {
@@ -22,14 +23,19 @@ interface Env {
 
 type AuthenticatedUser = { id: string; email: string };
 
-function authenticatedUser(request: Request): AuthenticatedUser | null {
+function authenticatedUser(request: Request, env: Env): AuthenticatedUser | null {
   const id = request.headers.get("oai-authenticated-user-id");
   const email = request.headers.get("oai-authenticated-user-email")?.trim().toLocaleLowerCase("en-US");
-  return id && email ? { id, email } : null;
+  if (id && email) return { id, email };
+  const hostname = new URL(request.url).hostname;
+  const localEmail = env.LOCAL_ADMIN_EMAIL?.trim().toLocaleLowerCase("en-US");
+  return localEmail && (hostname === "localhost" || hostname === "127.0.0.1")
+    ? { id: "local-boardwise-admin", email: localEmail }
+    : null;
 }
 
 function requireAdmin(request: Request, env: Env): AuthenticatedUser | Response {
-  const user = authenticatedUser(request);
+  const user = authenticatedUser(request, env);
   if (!user) return Response.json({ error: "需要登录" }, { status: 401 });
   const allowed = (env.ADMIN_EMAILS ?? "").split(",").map((email) => email.trim().toLocaleLowerCase("en-US")).filter(Boolean);
   if (!allowed.includes(user.email)) return Response.json({ error: "没有目录审核权限" }, { status: 403 });
