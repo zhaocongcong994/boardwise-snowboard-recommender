@@ -1,0 +1,29 @@
+{
+  "policyVersion": 1,
+  "updatedAt": "2026-08-13",
+  "pricePriority": ["brand_official", "authorized_retailer", "official_flagship"],
+  "rules": {
+    "acceptedCurrency": "CNY",
+    "priceMaxAgeDays": 14,
+    "requireExactBrandModelSeason": true,
+    "automaticPublishing": false,
+    "foreignOfficialPrice": "skip"
+  },
+  "brands": [
+    { "brand": "Burton", "officialDomains": ["burton.com"] },
+    { "brand": "Salomon", "officialDomains": ["salomon.com"] },
+    { "brand": "Nitro", "officialDomains": ["nitrosnowboards.com"] },
+    { "brand": "Nidecker", "officialDomains": ["nidecker.com"] },
+    { "brand": "Rome", "officialDomains": ["romesnowboards.com"] },
+    { "brand": "CAPiTA", "officialDomains": ["capitasnowboarding.com"] },
+    { "brand": "Jones", "officialDomains": ["jonessnowboards.com"] },
+    { "brand": "K2", "officialDomains": ["k2snow.com"] },
+    { "brand": "Ride", "officialDomains": ["ridesnowboards.com"] },
+    { "brand": "GNU", "officialDomains": ["gnu.com"] },
+    { "brand": "Lib Tech", "officialDomains": ["lib-tech.com"] },
+    { "brand": "YES", "officialDomains": ["yessnowboards.com"] },
+    { "brand": "Arbor", "officialDomains": ["arborcollective.com"] },
+    { "brand": "Bataleon", "officialDomains": ["bataleon.com"] },
+    { "brand": "Never Summer", "officialDomains": ["neversummer.com"] }
+  ]
+}

@@ -31,6 +31,15 @@ export type Board = {
   updatedAt: string;
   color: string;
   variants: Array<{ size: number; waist: number; weightMin: number; weightMax: number }>;
+  priceInfo?: {
+    amount: number;
+    currency: "CNY";
+    sourceType: "brand_official" | "authorized_retailer" | "official_flagship";
+    sourceName: string;
+    sourceUrl: string;
+    observedAt: string;
+    priceLabel: "官网价" | "授权店参考价" | "官方旗舰店参考价";
+  } | null;
 };
 
 export type Recommendation = {
@@ -42,6 +51,61 @@ export type Recommendation = {
   reasons: string[];
   caution: string;
 };
+
+export const PROFILE_LIMITS = {
+  height: { min: 130, max: 210 },
+  weight: { min: 35, max: 140 },
+  foot: { min: 20, max: 32, step: 0.1 },
+  mondo: { min: 21, max: 32, step: 0.5 },
+  "daily-eu": { min: 34, max: 50, step: 1 },
+  snowDays: { min: 0, max: 60 },
+  budget: { min: 1500, max: 10000, step: 100 },
+} as const;
+
+export type ProfileField = "height" | "weight" | "shoeValue" | "snowDays" | "budget";
+export type ProfileValidationErrors = Partial<Record<ProfileField, string>>;
+
+function isFiniteNumber(value: number) {
+  return Number.isFinite(value);
+}
+
+function isStepAligned(value: number, step: number) {
+  return Math.abs(value / step - Math.round(value / step)) < 1e-8;
+}
+
+export function validateProfile(profile: Profile): ProfileValidationErrors {
+  const errors: ProfileValidationErrors = {};
+
+  if (!isFiniteNumber(profile.height) || profile.height < PROFILE_LIMITS.height.min || profile.height > PROFILE_LIMITS.height.max) {
+    errors.height = `请输入 ${PROFILE_LIMITS.height.min}–${PROFILE_LIMITS.height.max} cm 的身高`;
+  }
+  if (!isFiniteNumber(profile.weight) || profile.weight < PROFILE_LIMITS.weight.min || profile.weight > PROFILE_LIMITS.weight.max) {
+    errors.weight = `请输入 ${PROFILE_LIMITS.weight.min}–${PROFILE_LIMITS.weight.max} kg 的体重`;
+  }
+
+  const shoeLimit = PROFILE_LIMITS[profile.shoeMode];
+  if (!isFiniteNumber(profile.shoeValue) || profile.shoeValue < shoeLimit.min || profile.shoeValue > shoeLimit.max) {
+    const unit = profile.shoeMode === "daily-eu" ? "EU" : "cm";
+    errors.shoeValue = `请输入 ${shoeLimit.min}–${shoeLimit.max} ${unit} 的有效尺码`;
+  } else if (!isStepAligned(profile.shoeValue, shoeLimit.step)) {
+    errors.shoeValue = profile.shoeMode === "daily-eu"
+      ? "日常鞋码请输入整数 EU 码"
+      : profile.shoeMode === "mondo"
+        ? "Mondo 尺码请按 0.5 cm 递增"
+        : "脚长请精确到 0.1 cm";
+  }
+
+  if (!Number.isInteger(profile.snowDays) || profile.snowDays < PROFILE_LIMITS.snowDays.min || profile.snowDays > PROFILE_LIMITS.snowDays.max) {
+    errors.snowDays = `滑雪天数应在 ${PROFILE_LIMITS.snowDays.min}–${PROFILE_LIMITS.snowDays.max} 天之间`;
+  }
+  if (!isFiniteNumber(profile.budget) || profile.budget < PROFILE_LIMITS.budget.min || profile.budget > PROFILE_LIMITS.budget.max) {
+    errors.budget = `预算应在 ¥${PROFILE_LIMITS.budget.min.toLocaleString("zh-CN")}–¥${PROFILE_LIMITS.budget.max.toLocaleString("zh-CN")} 之间`;
+  } else if (!Number.isInteger(profile.budget) || profile.budget % PROFILE_LIMITS.budget.step !== 0) {
+    errors.budget = `预算请输入 ${PROFILE_LIMITS.budget.step} 元的整数倍`;
+  }
+
+  return errors;
+}
 
 export const boards: Board[] = [
   {
@@ -175,14 +239,15 @@ export const boards: Board[] = [
 ];
 
 const dailyEuToMondo: Record<number, number> = {
-  35: 22.5, 36: 23, 37: 23.5, 38: 24, 39: 25, 40: 25.5,
-  41: 26, 42: 27, 43: 27.5, 44: 28, 45: 29, 46: 30,
+  34: 22, 35: 22.5, 36: 23, 37: 23.5, 38: 24, 39: 25, 40: 25.5,
+  41: 26, 42: 27, 43: 27.5, 44: 28, 45: 29, 46: 30, 47: 30.5,
+  48: 31, 49: 31.5, 50: 32,
 };
 
 export function estimateMondo(profile: Pick<Profile, "shoeMode" | "shoeValue">) {
   if (profile.shoeMode === "daily-eu") {
     return {
-      mondo: dailyEuToMondo[Math.round(profile.shoeValue)] ?? 26,
+      mondo: dailyEuToMondo[profile.shoeValue] ?? Number.NaN,
       estimated: true,
     };
   }
@@ -202,10 +267,11 @@ function idealFlex(profile: Profile) {
   return Math.max(2, Math.min(7, levelBase + feelDelta));
 }
 
-export function recommend(profile: Profile): Recommendation[] {
+export function recommend(profile: Profile, catalog: Board[] = boards): Recommendation[] {
+  if (Object.keys(validateProfile(profile)).length > 0) return [];
   const { mondo, estimated } = estimateMondo(profile);
   const minWaist = requiredWaist(mondo);
-  const candidates = boards.flatMap((board) => {
+  const candidates = catalog.flatMap((board) => {
     const viable = board.variants
       .filter((variant) => profile.weight >= variant.weightMin && profile.weight <= variant.weightMax)
       .filter((variant) => variant.waist >= minWaist)
