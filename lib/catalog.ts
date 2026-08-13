@@ -45,6 +45,16 @@ export function priceSourcePriority(sourceType: PriceSourceType) {
   return pricePriority[sourceType];
 }
 
+function priceSourceId(boardId: string, url: string) {
+  let hash = 2166136261;
+  for (const char of url) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  return `${boardId}-price-${(hash >>> 0).toString(16)}`;
+}
+
+export function resolvedPriceSourceId(boardId: string, specificationUrl: string, priceUrl: string) {
+  return specificationUrl === priceUrl ? `${boardId}-spec` : priceSourceId(boardId, priceUrl);
+}
+
 export function catalogIdentity(brand: string, model: string, season: string, audience = "adult") {
   return [brand, model, season, audience].map((value) => value.trim().toLocaleLowerCase("en-US")).join("::");
 }

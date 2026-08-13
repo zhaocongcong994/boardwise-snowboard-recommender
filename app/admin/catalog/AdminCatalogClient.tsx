@@ -34,7 +34,7 @@ function ChangeCard({ change, onReviewed }: { change: Change; onReviewed: () => 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, note }),
       });
-      const data = await response.json();
+      const data = await response.json().catch(() => ({ error: `审核接口返回异常（HTTP ${response.status}）` }));
       if (!response.ok) throw new Error(data.details?.join("；") || data.error || "审核失败");
       onReviewed();
     } catch (reason) {

@@ -1,7 +1,7 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
-import { loadPublishedCatalog, validateCatalogSubmission, type CatalogSubmission } from "../lib/catalog";
+import { loadPublishedCatalog, resolvedPriceSourceId, validateCatalogSubmission, type CatalogSubmission } from "../lib/catalog";
 import { boards, buildSelectionGuide, recommend, validateProfile, type Profile } from "../lib/recommendation";
 
 interface Env {
@@ -48,12 +48,6 @@ async function sha256(value: string) {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function priceSourceId(boardId: string, url: string) {
-  let hash = 2166136261;
-  for (const char of url) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
-  return `${boardId}-price-${(hash >>> 0).toString(16)}`;
-}
-
 async function publishChange(db: D1Database, change: Record<string, unknown>, user: AuthenticatedUser, note: string | null) {
   const submission = JSON.parse(String(change.payload_json)) as CatalogSubmission;
   const errors = validateCatalogSubmission(submission);
@@ -80,16 +74,16 @@ async function publishChange(db: D1Database, change: Record<string, unknown>, us
   ];
 
   if (price) {
-    const sourceId = priceSourceId(board.id, price.sourceUrl);
+    const sourceId = resolvedPriceSourceId(board.id, specificationSource.sourceUrl, price.sourceUrl);
     const expiresAt = new Date(new Date(price.observedAt).getTime() + 14 * 86400000).toISOString();
-    statements.push(
-      db.prepare(`INSERT INTO catalog_sources (id, board_id, source_type, source_name, url, verified_at, is_official)
+    if (price.sourceUrl !== specificationSource.sourceUrl) {
+      statements.push(db.prepare(`INSERT INTO catalog_sources (id, board_id, source_type, source_name, url, verified_at, is_official)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(board_id, url) DO UPDATE SET source_type=excluded.source_type, source_name=excluded.source_name, verified_at=excluded.verified_at, is_official=excluded.is_official`)
-        .bind(sourceId, board.id, price.sourceType, price.sourceName, price.sourceUrl, price.observedAt, price.sourceType !== "authorized_retailer" ? 1 : 0),
-      db.prepare("INSERT INTO price_snapshots (id, board_id, source_id, amount, currency, availability, observed_at, expires_at) VALUES (?, ?, ?, ?, ?, 'in_stock', ?, ?)")
-        .bind(crypto.randomUUID(), board.id, sourceId, price.amount, price.currency, price.observedAt, expiresAt),
-    );
+        .bind(sourceId, board.id, price.sourceType, price.sourceName, price.sourceUrl, price.observedAt, price.sourceType !== "authorized_retailer" ? 1 : 0));
+    }
+    statements.push(db.prepare("INSERT INTO price_snapshots (id, board_id, source_id, amount, currency, availability, observed_at, expires_at) VALUES (?, ?, ?, ?, ?, 'in_stock', ?, ?)")
+      .bind(crypto.randomUUID(), board.id, sourceId, price.amount, price.currency, price.observedAt, expiresAt));
   }
 
   statements.push(
@@ -172,7 +166,14 @@ const worker = {
       if (body.action !== "approve" && body.action !== "reject") return Response.json({ error: "审核动作无效" }, { status: 400 });
       const change = await env.DB.prepare("SELECT * FROM catalog_changes WHERE id = ? AND status = 'pending'").bind(reviewMatch[1]).first<Record<string, unknown>>();
       if (!change) return Response.json({ error: "待审核变更不存在或已处理" }, { status: 404 });
-      if (body.action === "approve") return publishChange(env.DB, change, user, body.note?.trim() || null);
+      if (body.action === "approve") {
+        try {
+          return await publishChange(env.DB, change, user, body.note?.trim() || null);
+        } catch (error) {
+          console.error("catalog approval failed", error);
+          return Response.json({ error: "批准发布失败，数据未写入；请刷新后重试", code: "CATALOG_PUBLISH_FAILED" }, { status: 500 });
+        }
+      }
       const now = new Date().toISOString();
       await env.DB.batch([
         env.DB.prepare("UPDATE catalog_changes SET status='rejected', reviewed_at=?, reviewed_by=?, review_note=? WHERE id=? AND status='pending'").bind(now, user.email, body.note?.trim() || null, change.id),
