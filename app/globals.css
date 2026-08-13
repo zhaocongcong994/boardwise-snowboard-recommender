@@ -106,6 +106,14 @@ legend { margin-bottom: 13px; font-size: 13px; font-weight: 700; }
 .range-field { display: block; margin-top: 30px; }
 .range-field span { display: flex; justify-content: space-between; font-size: 13px; }
 .range-field input { width: 100%; accent-color: #5bb7db; margin-top: 16px; }
+.experience-field > p { margin: 0 0 14px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.experience-control { display: grid; grid-template-columns: 1fr 220px; gap: 12px; }
+.experience-control > label { display: block; padding: 14px 18px; background: #fff; border: 1px solid var(--line); }
+.experience-control > label > span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 11px; }
+.experience-control input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 32px; font-weight: 700; }
+.experience-control > label.field-invalid { border-color: #c84938; box-shadow: 0 0 0 3px rgba(200,73,56,.1); }
+.experience-units { align-self: stretch; }
+.experience-limit { display: block; margin-top: 8px; color: var(--muted); font-size: 10px; }
 .feelings { margin-top: 12px; }
 .budget-field div { display: flex; align-items: baseline; gap: 15px; }
 .budget-field div > b { font-size: 26px; }
@@ -255,6 +263,7 @@ legend { margin-bottom: 13px; font-size: 13px; font-weight: 700; }
   .quiz-content { padding-top: 50px; }
   .question-section h1 { font-size: 40px; }
   .number-grid, .option-grid.two-col { grid-template-columns: 1fr; }
+  .experience-control { grid-template-columns: 1fr; }
   .segmented button { padding: 12px 5px; font-size: 10px; }
   .question-section { min-height: 620px; }
   .quiz-footer { position: sticky; bottom: 0; padding: 15px 0; background: rgba(246,248,246,.95); }

@@ -18,12 +18,20 @@ test("rejects implausible body measurements and out-of-range days", () => {
     ...defaultProfile,
     height: 250,
     weight: -5,
-    snowDays: 61,
+    snowExperienceValue: 3651,
+    snowExperienceUnit: "days",
   });
 
   assert.match(errors.height, /130–210/);
   assert.match(errors.weight, /35–140/);
-  assert.match(errors.snowDays, /0–60/);
+  assert.match(errors.snowExperienceValue, /0–3650/);
+});
+
+test("accepts day, month and year experience without false day conversion", () => {
+  assert.deepEqual(validateProfile({ ...defaultProfile, snowExperienceValue: 75, snowExperienceUnit: "days" }), {});
+  assert.deepEqual(validateProfile({ ...defaultProfile, snowExperienceValue: 18, snowExperienceUnit: "months" }), {});
+  assert.deepEqual(validateProfile({ ...defaultProfile, snowExperienceValue: 12, snowExperienceUnit: "years" }), {});
+  assert.match(validateProfile({ ...defaultProfile, snowExperienceValue: 51, snowExperienceUnit: "years" }).snowExperienceValue, /0–50/);
 });
 
 test("validates each shoe input mode and precision", () => {

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   defaultProfile,
   estimateMondo,
+  ExperienceUnit,
   PROFILE_LIMITS,
   Profile,
   ProfileField,
@@ -17,7 +18,7 @@ import {
 const steps = ["身体与脚型", "技术能力", "滑行偏好", "预算确认"];
 const stepFields: ProfileField[][] = [
   ["height", "weight", "shoeValue"],
-  ["snowDays"],
+  ["snowExperienceValue"],
   [],
   ["budget"],
 ];
@@ -323,7 +324,21 @@ export default function RecommendationApp() {
               <OptionCard active={profile.level === "beginner"} title="可以连续换刃" copy="能在初中级道控制速度并完成连续转弯" onClick={() => patchProfile({ level: "beginner", canLinkTurns: true })} />
               <OptionCard active={profile.level === "intermediate"} title="稳定滑行，准备进阶" copy="多数雪道可控，开始关注刻滑、平花或复杂地形" onClick={() => patchProfile({ level: "intermediate", canLinkTurns: true })} />
             </div>
-            <label className="range-field"><span>累计滑雪天数 <b>{profile.snowDays} 天</b></span><input type="range" min={PROFILE_LIMITS.snowDays.min} max={PROFILE_LIMITS.snowDays.max} value={profile.snowDays} onChange={(e) => patchProfile({ snowDays: Number(e.target.value) })} aria-invalid={Boolean(errors.snowDays)} />{errors.snowDays && <small className="field-error" role="alert">{errors.snowDays}</small>}</label>
+            <fieldset className="experience-field">
+              <legend>累计滑雪经验</legend>
+              <p>按你实际参与滑雪的时间填写；推荐仍以“现在能做什么”为主要依据，不会把一年简单换算成 365 个雪日。</p>
+              <div className="experience-control">
+                <label className={errors.snowExperienceValue ? "field-invalid" : ""}>
+                  <span>经验数值</span>
+                  <input type="number" min={PROFILE_LIMITS.experience[profile.snowExperienceUnit].min} max={PROFILE_LIMITS.experience[profile.snowExperienceUnit].max} step="1" value={profile.snowExperienceValue} onChange={(e) => patchProfile({ snowExperienceValue: Number(e.target.value) })} aria-invalid={Boolean(errors.snowExperienceValue)} required />
+                </label>
+                <div className="segmented experience-units" aria-label="滑雪经验单位">
+                  {([['days', '天'], ['months', '月'], ['years', '年']] as [ExperienceUnit, string][]).map(([unit, label]) => <button type="button" key={unit} className={profile.snowExperienceUnit === unit ? "active" : ""} aria-pressed={profile.snowExperienceUnit === unit} onClick={() => patchProfile({ snowExperienceUnit: unit, snowExperienceValue: Math.min(profile.snowExperienceValue, PROFILE_LIMITS.experience[unit].max) })}>{label}</button>)}
+                </div>
+              </div>
+              <small className="experience-limit">当前单位允许 0–{PROFILE_LIMITS.experience[profile.snowExperienceUnit].max} {PROFILE_LIMITS.experience[profile.snowExperienceUnit].label}</small>
+              {errors.snowExperienceValue && <small className="field-error" role="alert">{errors.snowExperienceValue}</small>}
+            </fieldset>
           </section>
         )}
 

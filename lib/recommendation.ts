@@ -1,6 +1,7 @@
 export type Level = "first" | "beginner" | "intermediate";
 export type Style = "all-mountain" | "carving" | "freestyle" | "powder";
 export type ShoeMode = "foot" | "mondo" | "daily-eu";
+export type ExperienceUnit = "days" | "months" | "years";
 
 export type Profile = {
   height: number;
@@ -8,7 +9,8 @@ export type Profile = {
   shoeMode: ShoeMode;
   shoeValue: number;
   level: Level;
-  snowDays: number;
+  snowExperienceValue: number;
+  snowExperienceUnit: ExperienceUnit;
   canLinkTurns: boolean;
   style: Style;
   feel: "easy" | "balanced" | "stable";
@@ -58,11 +60,15 @@ export const PROFILE_LIMITS = {
   foot: { min: 20, max: 32, step: 0.1 },
   mondo: { min: 21, max: 32, step: 0.5 },
   "daily-eu": { min: 34, max: 50, step: 1 },
-  snowDays: { min: 0, max: 60 },
+  experience: {
+    days: { min: 0, max: 3650, label: "天" },
+    months: { min: 0, max: 120, label: "个月" },
+    years: { min: 0, max: 50, label: "年" },
+  },
   budget: { min: 1500, max: 10000, step: 100 },
 } as const;
 
-export type ProfileField = "height" | "weight" | "shoeValue" | "snowDays" | "budget";
+export type ProfileField = "height" | "weight" | "shoeValue" | "snowExperienceValue" | "budget";
 export type ProfileValidationErrors = Partial<Record<ProfileField, string>>;
 
 function isFiniteNumber(value: number) {
@@ -95,8 +101,11 @@ export function validateProfile(profile: Profile): ProfileValidationErrors {
         : "脚长请精确到 0.1 cm";
   }
 
-  if (!Number.isInteger(profile.snowDays) || profile.snowDays < PROFILE_LIMITS.snowDays.min || profile.snowDays > PROFILE_LIMITS.snowDays.max) {
-    errors.snowDays = `滑雪天数应在 ${PROFILE_LIMITS.snowDays.min}–${PROFILE_LIMITS.snowDays.max} 天之间`;
+  const experienceLimit = PROFILE_LIMITS.experience[profile.snowExperienceUnit];
+  if (!experienceLimit || !Number.isInteger(profile.snowExperienceValue) || profile.snowExperienceValue < experienceLimit.min || profile.snowExperienceValue > experienceLimit.max) {
+    errors.snowExperienceValue = experienceLimit
+      ? `滑雪经验应在 ${experienceLimit.min}–${experienceLimit.max} ${experienceLimit.label}之间`
+      : "请选择有效的滑雪经验单位";
   }
   if (!isFiniteNumber(profile.budget) || profile.budget < PROFILE_LIMITS.budget.min || profile.budget > PROFILE_LIMITS.budget.max) {
     errors.budget = `预算应在 ¥${PROFILE_LIMITS.budget.min.toLocaleString("zh-CN")}–¥${PROFILE_LIMITS.budget.max.toLocaleString("zh-CN")} 之间`;
@@ -337,7 +346,8 @@ export const defaultProfile: Profile = {
   shoeMode: "daily-eu",
   shoeValue: 41,
   level: "beginner",
-  snowDays: 8,
+  snowExperienceValue: 8,
+  snowExperienceUnit: "days",
   canLinkTurns: true,
   style: "all-mountain",
   feel: "balanced",
